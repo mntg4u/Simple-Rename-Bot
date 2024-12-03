@@ -1,67 +1,103 @@
 from pyrogram import Client, filters, enums
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup 
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from config import ADMIN
- 
 
-@Client.on_message(filters.command("start") & filters.private)                             
+# Constants for frequently used text and buttons
+SOURCE_CODE_URL = "https://github.com/MrMKN/Simple-Rename-Bot"
+HOW_TO_DEPLOY_URL = "https://youtu.be/oc847WvOUaI"
+BOT_UPDATES_URL = "https://t.me/mkn_bots_updates"
+DEVELOPER_URL = "https://github.com/MrMKN"
+MASTER_1_URL = "https://t.me/Mo_Tech_YT"
+MASTER_2_URL = "https://t.me/venombotupdates"
+
+# Start Command Handler
+@Client.on_message(filters.command("start") & filters.private)
 async def start_cmd(bot, msg):
-    txt="This is personal use bot 🙏. Do you want your own bot? 👇 Click the source code to deploy"
-    btn = InlineKeyboardMarkup([[
-        InlineKeyboardButton("🤖 SOURCE CODE", url="https://github.com/MrMKN/Simple-Rename-Bot")
-        ],[
-        InlineKeyboardButton("🖥️ How To Deploy", url="https://youtu.be/oc847WvOUaI")
-    ]])
+    """Handles the /start command."""
+    txt = (
+        "This is a personal-use bot 🙏. Want your own bot? 👇 Click the source code to deploy."
+    )
+    buttons = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🤖 SOURCE CODE", url=SOURCE_CODE_URL)],
+        [InlineKeyboardButton("🖥️ How To Deploy", url=HOW_TO_DEPLOY_URL)]
+    ])
+    
+    # If user is not ADMIN, show the deployment information
     if msg.from_user.id != ADMIN:
-        return await msg.reply_text(text=txt, reply_markup=btn, disable_web_page_preview = True)
-    await start(bot, msg, cb=False)
+        return await msg.reply_text(text=txt, reply_markup=buttons, disable_web_page_preview=True)
+    
+    # If user is ADMIN, proceed to show bot details
+    await show_start_info(bot, msg, cb=False)
 
 
+# Callback Query: Start
 @Client.on_callback_query(filters.regex("start"))
-async def start(bot, msg, cb=True):   
-    txt=f"hai {msg.from_user.mention} i am simple rename bot with personal usage.\nthis bot is made by <b><a href=https://github.com/MrMKN>MrMKN</a></b>"                                     
-    button= [[
-        InlineKeyboardButton("🤖 Bot Updates", url="https://t.me/mkn_bots_updates")
-        ],[
-        InlineKeyboardButton("ℹ️ Help", callback_data="help"),
-        InlineKeyboardButton("📡 About", callback_data="about") 
-    ]]  
+async def show_start_info(bot, msg, cb=True):
+    """Displays the start message with bot details."""
+    txt = (
+        f"Hi {msg.from_user.mention}, I am a simple rename bot for personal use.\n"
+        f"This bot is developed by <b><a href={DEVELOPER_URL}>MrMKN</a></b>."
+    )
+    buttons = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🤖 Bot Updates", url=BOT_UPDATES_URL)],
+        [
+            InlineKeyboardButton("ℹ️ Help", callback_data="help"),
+            InlineKeyboardButton("📡 About", callback_data="about")
+        ]
+    ])
+    
     if cb:
-        await msg.message.edit(text=txt, reply_markup=InlineKeyboardMarkup(button), disable_web_page_preview = True, parse_mode=enums.ParseMode.HTML)
+        await msg.message.edit(text=txt, reply_markup=buttons, disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
     else:
-        await msg.reply_text(text=txt, reply_markup=InlineKeyboardMarkup(button), disable_web_page_preview = True, parse_mode=enums.ParseMode.HTML)
+        await msg.reply_text(text=txt, reply_markup=buttons, disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
 
 
+# Callback Query: Help
 @Client.on_callback_query(filters.regex("help"))
-async def help(bot, msg):
-    txt = "just send a file and /rename <new name> with replayed your file\n\n"
-    txt += "send photo to set thumbnail automatic \n"
-    txt += "/view to see your thumbnail \n"
-    txt += "/del to delete your thumbnail"
-    button= [[        
-        InlineKeyboardButton("🚫 Close", callback_data="del"),
-        InlineKeyboardButton("⬅️ Back", callback_data="start") 
-    ]]  
-    await msg.message.edit(text=txt, reply_markup=InlineKeyboardMarkup(button), disable_web_page_preview = True)
+async def show_help(bot, msg):
+    """Displays help information."""
+    txt = (
+        "To use this bot:\n"
+        "- Send a file and reply with `/rename <new name>` to rename it.\n"
+        "- Send a photo to set a custom thumbnail.\n"
+        "- Use /view to see your current thumbnail.\n"
+        "- Use /del to delete your thumbnail."
+    )
+    buttons = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("🚫 Close", callback_data="del"),
+            InlineKeyboardButton("⬅️ Back", callback_data="start")
+        ]
+    ])
+    await msg.message.edit(text=txt, reply_markup=buttons, disable_web_page_preview=True)
 
 
+# Callback Query: About
 @Client.on_callback_query(filters.regex("about"))
-async def about(bot, msg):
-    me=await bot.get_me()
-    Master=f"<a href=https://t.me/Mo_Tech_YT>MoTech</a> & <a href=https://t.me/venombotupdates>MhdRzn</a>"  
-    Source="<a href=https://github.com/MrMKN/Simple-Rename-Bot>Click Here</a>"
-    txt=f"<b>Bot Name: {me.mention}\nDeveloper: <a href=https://github.com/MrMKN>MrMKN</a>\nBot Updates: <a href=https://t.me/mkn_bots_updates>Mᴋɴ Bᴏᴛᴢ™</a>\nMy Master's: {Master}\nSource Code: {Source}</b>"                 
-    button= [[        
-        InlineKeyboardButton("🚫 Close", callback_data="del"),
-        InlineKeyboardButton("⬅️ Back", callback_data="start") 
-    ]]  
-    await msg.message.edit(text=txt, reply_markup=InlineKeyboardMarkup(button), disable_web_page_preview = True, parse_mode=enums.ParseMode.HTML)
+async def show_about(bot, msg):
+    """Displays information about the bot."""
+    me = await bot.get_me()
+    txt = (
+        f"<b>Bot Name:</b> {me.mention}\n"
+        f"<b>Developer:</b> <a href={DEVELOPER_URL}>MrMKN</a>\n"
+        f"<b>Bot Updates:</b> <a href={BOT_UPDATES_URL}>Mᴋɴ Bᴏᴛᴢ™</a>\n"
+        f"<b>Masters:</b> <a href={MASTER_1_URL}>MoTech</a>, <a href={MASTER_2_URL}>MhdRzn</a>\n"
+        f"<b>Source Code:</b> <a href={SOURCE_CODE_URL}>Click Here</a>"
+    )
+    buttons = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("🚫 Close", callback_data="del"),
+            InlineKeyboardButton("⬅️ Back", callback_data="start")
+        ]
+    ])
+    await msg.message.edit(text=txt, reply_markup=buttons, disable_web_page_preview=True, parse_mode=enums.ParseMode.HTML)
 
 
+# Callback Query: Close
 @Client.on_callback_query(filters.regex("del"))
-async def closed(bot, msg):
+async def close_message(bot, msg):
+    """Closes the message."""
     try:
         await msg.message.delete()
-    except:
-        return
-
-
+    except Exception as e:
+        print(f"Failed to delete message: {e}")
